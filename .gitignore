@@ -1,2 +1,15 @@
 ICPC-Helwan-Extra
 .vscode
+a.in
+a.out
+trial
+trial.cpp
+
+# rules to ignore excutable files
+*
+!*/
+!*.c
+!*.cpp
+!*.h
+!*.hpp
+!.gitignore
