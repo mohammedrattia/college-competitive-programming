@@ -1,10 +1,3 @@
-ICPC-Helwan-Extra
-.vscode
-a.in
-a.out
-trial
-trial.cpp
-
 # rules to ignore excutable files
 *
 !*/
@@ -13,3 +6,10 @@ trial.cpp
 !*.h
 !*.hpp
 !.gitignore
+
+ICPC-Helwan-Extra
+.vscode
+a.in
+a.out
+trial
+trial.cpp
