@@ -6,6 +6,7 @@
 !*.h
 !*.hpp
 !.gitignore
+!*.md
 
 ICPC-Helwan-Extra
 .vscode
