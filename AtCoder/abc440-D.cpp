@@ -1,0 +1,134 @@
+// #pragma GCC optimize("O2")
+
+#include <iostream>
+#include <string.h>
+#include <string>
+#include <numeric>
+#include <array>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <math.h>
+#include <climits>
+#include <map>
+#include <set>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <unordered_map>
+#include <random>
+
+using namespace std;
+
+#define ll long long
+#define vi vector<int>
+#define vll vector<long long>
+#define pii pair<int, int>
+#define pll pair<ll, ll>
+#define F first
+#define S second
+
+#define rep(i, a, b) for (ll i = (a); i < (b); i++)
+#define rrep(i, a, b) for (ll i = (a); i >= (b); i--)
+
+#define all(x) (x).begin(), (x).end()
+#define PB push_back
+#define MP make_pair
+#define sz(x) (int)(x).size()
+#define SQ(a) (a) * (a)
+
+#define FAST                          \
+    ios_base::sync_with_stdio(false); \
+    cin.tie(NULL);                    \
+    cout.tie(NULL);
+#define dbg(x) cout << #x << " = " << x << '\n'
+#define endl '\n'
+
+const ll INF = 1e18;
+const ll MOD = 1e9 + 7;
+const ll iMOD = 998244353;
+const int SZ = 1e5 + 1;
+
+bool is_valid(int i, int j, int n, int m) { return i < n && i >= 0 && j < m && j >= 0; }
+int dx[4] = {0, 1, 0, -1};
+int dy[4] = {-1, 0, 1, 0};
+
+mt19937 rnd(time(nullptr));
+template <typename T>
+T rng(T l, T r)
+{
+    return uniform_int_distribution<T>(l, r)(rnd);
+}
+
+ll nCr(ll n, ll r)
+{
+    // Invalid case
+    if (r > n)
+        return 0;
+    // Base cases
+    if (r == 0 || n == r)
+        return 1;
+
+    double res = 0;
+    for (ll i = 0; i < r; i++)
+    {
+        res += log(n - i) - log(i + 1);
+    }
+
+    return (ll)round(exp(res));
+}
+
+void solve()
+{
+    // freopen("file.in", "r", stdin);
+    // freopen("file.out", "w", stdout);
+    ll n, q;
+    cin >> n >> q;
+    vll arr(n);
+    map<ll, ll> mp;
+    rep(i, 0, n) cin >> arr[i];
+    sort(arr.begin(), arr.end());
+    while (q--)
+    {
+        ll x, y;
+        cin >> x >> y;
+        ll a = lower_bound(all(arr), x) - arr.begin();
+        ll l = x, r = INF;
+        while (l <= r)
+        {
+            ll mid = l + (r - l) / 2;
+            ll b = lower_bound(all(arr), mid) - arr.begin();
+            bool flag = binary_search(all(arr), mid);
+            ll elements = b - a + flag;
+            ll diff = mid - x + 1;
+            if (flag)
+            {
+                if (diff - elements >= y)
+                    r = mid - 1;
+                else
+                    l = mid + 1;
+            }
+            else
+            {
+                if (diff - elements > y)
+                    r = mid - 1;
+                else if (diff - elements < y)
+                    l = mid + 1;
+                else
+                {
+                    cout << mid << endl;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+int main()
+{
+    // FAST;
+    // int t;
+    // cin >> t;
+    // while (t--)
+    solve();
+}
