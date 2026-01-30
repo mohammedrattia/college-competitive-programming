@@ -66,116 +66,241 @@ T rng(T l, T r)
 }
 
 // NUMBER THEORY II
-vll div(int n)
+namespace num_theory
 {
-    vll divisors;
-    for (int i = 1; i <= sqrt(n); i++)
+
+    vll div(int n)
     {
-        if (n % i == 0)
+        vll divisors;
+        for (int i = 1; i <= sqrt(n); i++)
         {
-            if (n / i == i)
+            if (n % i == 0)
             {
-                divisors.push_back(i);
+                if (n / i == i)
+                {
+                    divisors.push_back(i);
+                }
+                else
+                {
+                    divisors.push_back(i);
+                    divisors.push_back(n / i);
+                }
             }
-            else
+        }
+        return divisors;
+    }
+    ll gcd(ll a, ll b)
+    {
+        if (b == 0)
+            return a;
+        return gcd(b, a % b);
+    }
+    ll lcm(ll a, ll b)
+    {
+        return (a * b) / gcd(a, b);
+    }
+    void moveEgcdStep(ll &a, ll &b, ll q)
+    {
+        ll next = a - q * b;
+        a = b;
+        b = next;
+    }
+    ll egcd(ll a, ll b, ll &x0, ll &y0)
+    {
+        ll r0 = a, r1 = b;
+        ll x1 = y0 = 0, y1 = x0 = 1;
+        while (r1 != 0)
+        {
+            ll q = r0 / r1;
+            moveEgcdStep(x0, x1, q);
+            moveEgcdStep(y0, y1, q);
+            moveEgcdStep(r0, r1, q);
+        }
+        return r0;
+    }
+    ll modInverse(ll a, ll mod)
+    {
+        ll x, y;
+        ll g = egcd(a, mod, x, y);
+        if (g != 1)
+            return -1;
+        return (x + mod) % mod;
+    }
+    ll fastPower(ll a, ll p)
+    {
+        if (p == 0)
+            return 1;
+        if (p == 1)
+            return a;
+        ll halfPower = fastPower(a, p / 2);
+        ll ret = halfPower * halfPower;
+        if (p % 2 == 1)
+            ret *= a;
+        return ret;
+    }
+    ll modPower(ll a, ll p, ll mod)
+    {
+        if (p == 0)
+            return 1;
+        if (p == 1)
+            return a;
+        ll halfPower = modPower(a, p / 2, mod);
+        ll ret = (halfPower * halfPower) % mod;
+        if (p % 2 == 1)
+            ret = (ret * a) % mod;
+        return ret % mod;
+    }
+    ll modInverseFer(ll a, ll m)
+    {
+        return modPower(a, m - 2, m);
+    }
+    vll fact;
+    void preFact(int n)
+    {
+        fact = vll(n);
+        fact[0] = 1ll;
+        fact[1] = 1ll;
+        rep(i, 2, n)
+        {
+            fact[i] = (i * fact[i - 1]) % MOD;
+        }
+    }
+    ll nCr(ll n, ll r)
+    {
+        if (r == 0ll)
+            return 1ll;
+        return (fact[n] * modInverseFer((fact[r] * fact[n - r]) % MOD, MOD)) % MOD;
+    }
+    ll nPr(ll n, ll r)
+    {
+        if (r == 0ll)
+            return 1ll;
+        return (fact[n] * modInverseFer(fact[n - r], MOD)) % MOD;
+    }
+    vll spf;
+    void sieve(ll n)
+    {
+        spf = vll(n + 1, 1);
+        spf[0] = 0;
+        for (int i = 2; i <= n; i++)
+        {
+            if (spf[i] == 1)
             {
-                divisors.push_back(i);
-                divisors.push_back(n / i);
+                for (int j = i; j <= n; j += i)
+                {
+                    if (spf[j] == 1)
+                        spf[j] = i;
+                }
             }
         }
     }
-    return divisors;
-}
-ll gcd(ll a, ll b)
+} // namespace num_theory
+
+// SEGMENT TREE
+namespace seg_tree
 {
-    if (b == 0)
-        return a;
-    return gcd(b, a % b);
-}
-ll lcm(ll a, ll b)
-{
-    return (a * b) / gcd(a, b);
-}
-void moveEgcdStep(ll &a, ll &b, ll q)
-{
-    ll next = a - q * b;
-    a = b;
-    b = next;
-}
-ll egcd(ll a, ll b, ll &x0, ll &y0)
-{
-    ll r0 = a, r1 = b;
-    ll x1 = y0 = 0, y1 = x0 = 0;
-    while (r1 != 0)
+    typedef ll segtype;
+    const segtype baseCase = 0;
+    class TreeNode
     {
-        ll q = r0 / r1;
-        moveEgcdStep(x0, x1, q);
-        moveEgcdStep(y0, y1, q);
-        moveEgcdStep(r0, r1, q);
-    }
-    return r0;
-}
-ll modInverse(ll a, ll mod)
-{
-    ll x, y;
-    ll g = egcd(a, mod, x, y);
-    if (g != 1)
-        return -1;
-    return (x + mod) % mod;
-}
-ll fastPower(ll a, ll p)
-{
-    if (p == 1)
-        return a;
-    ll halfPower = fastPower(a, p / 2);
-    ll ret = halfPower * halfPower;
-    if (p % 2 != 1)
-        ret *= a;
-    return ret;
-}
-ll modPower(ll a, ll p, ll mod)
-{
-    if (p == 1)
-        return a;
-    ll halfPower = fastPower(a, p / 2);
-    ll ret = (halfPower * halfPower) % mod;
-    if (p % 2 != 1)
-        ret = (ret * a) % mod;
-    return ret % mod;
-}
-ll modInverseFer(ll a, ll m)
-{
-    return modPower(a, m - 2, m);
-}
-vll fact;
-void preFact(int n)
-{
-    fact = vll(n);
-    fact[0] = 1ll;
-    fact[1] = 1ll;
-    rep(i, 2, n)
+    public:
+        TreeNode *left;
+        TreeNode *right;
+        segtype value;
+
+        TreeNode()
+        {
+            left = NULL;
+            right = NULL;
+            value = 0;
+        }
+    };
+    class Tree
     {
-        fact[i] = (i * fact[i - 1]) % MOD;
-    }
-}
-ll nCr(ll n, ll r)
-{
-    if (r == 0ll)
-        return 1ll;
-    return (fact[n] * modInverseFer((fact[r] * fact[n - r]) % MOD, MOD)) % MOD;
-}
-ll nPr(ll n, ll r)
-{
-    if (r == 0ll)
-        return 1ll;
-    return (fact[n] * modInverseFer(fact[n - r], MOD)) % MOD;
-}
+    public:
+        TreeNode *head;
+        Tree()
+        {
+            head = NULL;
+        }
+    };
+    class SegmentTree
+    {
+    public:
+        Tree tree;
+
+        SegmentTree(vector<segtype> &arr)
+        {
+            tree.head = buildTree(&arr, 0, arr.size());
+        }
+        void set(int i, segtype v, TreeNode *x, int lx, int rx)
+        {
+            if (rx - lx == 1)
+            {
+                x->value = v;
+                return;
+            }
+            int m = (lx + rx) / 2;
+            if (i <= m)
+                set(i, v, x->left, lx, m);
+            else
+                set(i, v, x->right, m + 1, rx);
+            x->value = op(x->left, x->right);
+        }
+        segtype sum(int l, int r, TreeNode *x, int lx, int rx)
+        {
+            if (l >= rx || lx >= r || x == NULL)
+                return baseCase;
+            if (lx >= l && rx <= r)
+                return x->value;
+            int m = (lx + rx) / 2;
+            segtype s1 = sum(l, r, x->left, lx, m);
+            segtype s2 = sum(l, r, x->right, m, rx);
+            return op(s1, s2);
+        }
+
+    private:
+        TreeNode *linkTwoSubtrees(TreeNode *left, TreeNode *right)
+        {
+            TreeNode *root = new TreeNode();
+            root->left = left;
+            root->right = right;
+            root->value = op(left, right);
+            return root;
+        }
+        TreeNode *buildTree(vector<segtype> *arr, int l, int r)
+        {
+            if (r - l == 1)
+            {
+                TreeNode *leaf = new TreeNode();
+                leaf->value = (*arr)[l];
+                return leaf;
+            }
+            int m = (l + r) / 2;
+            TreeNode *left = buildTree(arr, l, m);
+            TreeNode *right = buildTree(arr, m, r);
+            TreeNode *root = linkTwoSubtrees(left, right);
+            return root;
+        }
+        segtype op(TreeNode *left, TreeNode *right)
+        {
+            return op(left->value, right->value);
+        }
+        segtype op(segtype a, segtype b)
+        {
+            return a + b;
+        }
+    };
+} // namespace seg_tree
 
 // SOLVE SPACE
 void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
+    ll n;
+    cin >> n;
+    cout << n * n << endl;
 }
 
 int main()

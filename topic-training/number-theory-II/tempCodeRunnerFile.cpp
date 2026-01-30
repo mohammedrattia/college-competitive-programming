@@ -1,1 +1,3 @@
-rep(i, 0, s.size())
+nt t;
+    cin >> t;
+    whil

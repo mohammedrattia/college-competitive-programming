@@ -1,0 +1,127 @@
+// #pragma GCC optimize("O2")
+
+#include <iostream>
+#include <string.h>
+#include <string>
+#include <numeric>
+#include <array>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <math.h>
+#include <climits>
+#include <map>
+#include <set>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <unordered_map>
+#include <random>
+
+using namespace std;
+
+// BASIC DEFINES
+#define ll long long
+#define vi vector<int>
+#define vll vector<long long>
+#define pii pair<int, int>
+#define pll pair<ll, ll>
+#define F first
+#define S second
+
+// LOOP DEFINES
+#define rep(i, a, b) for (ll i = (a); i < (b); i++)
+#define rrep(i, a, b) for (ll i = (a); i >= (b); i--)
+
+// OTHER DEFINES
+#define all(x) (x).begin(), (x).end()
+#define PB push_back
+#define MP make_pair
+#define sz(x) (int)(x).size()
+#define SQ(a) (a) * (a)
+#define dbg(x) cout << #x << " = " << x << '\n'
+#define FAST                          \
+    ios_base::sync_with_stdio(false); \
+    cin.tie(NULL);                    \
+    cout.tie(NULL);
+#define endl '\n'
+
+// CONSTANTS
+const ll INF = 1e18;
+const ll MOD = 1e9 + 7;
+const ll iMOD = 998244353;
+const int SZ = 1e5 + 1;
+
+// SOLVE SPACE
+ll modPower(ll a, ll p, ll mod)
+{
+    if (p == 0)
+        return 1;
+    if (p == 1)
+        return a;
+    ll halfPower = modPower(a, p / 2, mod);
+    ll ret = (halfPower * halfPower) % mod;
+    if (p % 2 == 1)
+        ret = (ret * a) % mod;
+    return ret % mod;
+}
+ll modInverseFer(ll a, ll m)
+{
+    return modPower(a, m - 2, m);
+}
+vll fact;
+void preFact(int n)
+{
+    fact = vll(n);
+    fact[0] = 1ll;
+    fact[1] = 1ll;
+    rep(i, 2, n)
+    {
+        fact[i] = (i * fact[i - 1]) % MOD;
+    }
+}
+ll nCr(ll n, ll r)
+{
+    if (r == 0ll)
+        return 1ll;
+    return (fact[n] * modInverseFer((fact[r] * fact[n - r]) % MOD, MOD)) % MOD;
+}
+void solve()
+{
+    // freopen("file.in", "r", stdin);
+    // freopen("file.out", "w", stdout);
+    ll n, k;
+    cin >> n >> k;
+    vll arr(n);
+    rep(i, 0, n)
+    {
+        cin >> arr[i];
+    }
+    sort(all(arr), greater<>());
+    map<ll, ll> freq;
+    rep(i, 0, k)
+    {
+        freq[arr[i]]++;
+    }
+    ll cnt = 0;
+    if (k != n)
+    {
+        ll i = k;
+        while (i < n && arr[i] == arr[k - 1])
+        {
+            freq[arr[i++]]++;
+            cnt++;
+        }
+    }
+    cout << nCr(freq[arr[k - 1]], cnt) << endl;
+}
+
+int main()
+{
+    // FAST;
+    preFact(1005);
+    int t;
+    cin >> t;
+    while (t--)
+        solve();
+}
