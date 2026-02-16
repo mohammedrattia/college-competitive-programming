@@ -66,96 +66,103 @@ T rng(T l, T r)
 }
 
 // SEGMENT TREE
-typedef ll segtype;
-#define baseCase (segtype)0;
-class TreeNode
+struct segtype
 {
-public:
+    ll value;
+};
+struct TreeNode
+{
     TreeNode *left;
     TreeNode *right;
-    segtype value;
-
-    TreeNode()
-    {
-        left = NULL;
-        right = NULL;
-        value = 0;
-    }
+    segtype item;
 };
-class Tree
+struct Tree
 {
-public:
     TreeNode *head;
-    Tree()
-    {
-        head = NULL;
-    }
 };
-class SegmentTree
+class SegTree
 {
 public:
+    const ll NEUTRAL_CASE = -1;
     Tree tree;
+    ll sz;
+    segtype (*merge)(segtype a, segtype b);
 
-    SegmentTree(vector<segtype> &arr)
+    SegTree(vector<ll> &arr, segtype (*operation)(segtype a, segtype b))
     {
+        merge = operation;
+        sz = arr.size();
         tree.head = buildTree(&arr, 0, arr.size());
     }
-    void set(int i, segtype v, TreeNode *x, int lx, int rx)
+
+    void set(int i, ll v)
     {
-        if (rx - lx == 1)
-        {
-            x->value = v;
-            return;
-        }
-        int m = (lx + rx) / 2;
-        if (i <= m)
-            set(i, v, x->left, lx, m);
-        else
-            set(i, v, x->right, m + 1, rx);
-        x->value = op(x->left, x->right);
+        setRec(i, v, tree.head, 0, sz);
     }
-    segtype sum(int l, int r, TreeNode *x, int lx, int rx)
+
+    ll get(int x)
     {
-        if (l >= rx || lx >= r || x == NULL)
-            return baseCase;
-        if (lx >= l && rx <= r)
-            return x->value;
-        int m = (lx + rx) / 2;
-        segtype s1 = sum(l, r, x->left, lx, m);
-        segtype s2 = sum(l, r, x->right, m, rx);
-        return op(s1, s2);
+        return getRec(x, tree.head, 0, sz);
     }
 
 private:
-    TreeNode *linkTwoSubtrees(TreeNode *left, TreeNode *right)
-    {
-        TreeNode *root = new TreeNode();
-        root->left = left;
-        root->right = right;
-        root->value = op(left, right);
-        return root;
-    }
-    TreeNode *buildTree(vector<segtype> *arr, int l, int r)
+    TreeNode *buildTree(vector<ll> *arr, int l, int r)
     {
         if (r - l == 1)
         {
             TreeNode *leaf = new TreeNode();
-            leaf->value = (*arr)[l];
+            leaf->item = single((*arr)[l]);
             return leaf;
         }
         int m = (l + r) / 2;
         TreeNode *left = buildTree(arr, l, m);
         TreeNode *right = buildTree(arr, m, r);
-        TreeNode *root = linkTwoSubtrees(left, right);
+        TreeNode *root = newParentNode(left, right);
         return root;
     }
-    segtype op(TreeNode *left, TreeNode *right)
+
+    TreeNode *newParentNode(TreeNode *left, TreeNode *right)
     {
-        return op(left->value, right->value);
+        TreeNode *root = new TreeNode();
+        root->left = left;
+        root->right = right;
+        root->item = merge(left->item, right->item);
+        return root;
     }
-    segtype op(segtype a, segtype b)
+
+    ll getRec(int v, TreeNode *x, int lx, int rx)
     {
-        return a + b;
+        if (x == NULL || x->item.value < v)
+        {
+            return NEUTRAL_CASE;
+        }
+        if (rx - lx == 1)
+            return lx;
+        int m = (lx + rx) / 2;
+        ll ret = getRec(v, x->left, lx, m);
+        if (ret != -1)
+            return ret;
+        return getRec(v, x->right, m, rx);
+    }
+
+    void setRec(int i, ll v, TreeNode *x, int lx, int rx)
+    {
+        if (rx - lx == 1)
+        {
+            x->item = single(v);
+            return;
+        }
+        int m = (lx + rx) / 2;
+        if (i < m)
+            setRec(i, v, x->left, lx, m);
+        else
+            setRec(i, v, x->right, m, rx);
+        x->item = merge(x->left->item, x->right->item);
+    }
+
+    segtype single(ll v)
+    {
+        return {v};
     }
 };
 
@@ -164,14 +171,29 @@ void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n;
-    cin >> n;
+    ll n, m;
+    cin >> n >> m;
     vll arr(n);
     rep(i, 0, n) cin >> arr[i];
-    SegmentTree st = SegmentTree(arr);
-    rep(i, 0, n)
+    SegTree st = SegTree(arr, [](segtype a, segtype b) -> segtype
+                         { return {max(b.value, a.value)}; });
+
+    rep(i, 0, m)
     {
-        cout << st.sum(i, i + 5, st.tree.head, 0, n) << endl;
+        ll c;
+        cin >> c;
+        if (c == 1)
+        {
+            ll a, b;
+            cin >> a >> b;
+            st.set(a, b);
+        }
+        else
+        {
+            ll x;
+            cin >> x;
+            cout << st.get(x) << endl;
+        }
     }
 }
 

@@ -199,99 +199,399 @@ namespace num_theory
 // SEGMENT TREE
 namespace seg_tree
 {
-    typedef ll segtype;
-    const segtype baseCase = 0;
-    class TreeNode
+    template <typename T>
+    struct SegTree
     {
-    public:
-        TreeNode *left;
-        TreeNode *right;
-        segtype value;
+        int size;
+        vector<T> tree;
+        T NEUTRAL_ELEMENT = {0}; // Change based on operation (0 for sum, INF for min)
 
-        TreeNode()
+        // Operation function (e.g., sum, min, max, gcd)
+        T merge(T a, T b)
         {
-            left = NULL;
-            right = NULL;
-            value = 0;
+            return {a.value + b.value};
         }
-    };
-    class Tree
-    {
-    public:
-        TreeNode *head;
-        Tree()
+        T single(ll v)
         {
-            head = NULL;
+            return {v};
         }
-    };
-    class SegmentTree
-    {
-    public:
-        Tree tree;
 
-        SegmentTree(vector<segtype> &arr)
+        // Constructor
+        SegTree(int n)
         {
-            tree.head = buildTree(&arr, 0, arr.size());
+            size = 1;
+            while (size < n)
+                size *= 2;
+            tree.resize(2 * size, NEUTRAL_ELEMENT);
         }
-        void set(int i, segtype v, TreeNode *x, int lx, int rx)
+
+        // Build from existing array
+        void build(vector<ll> &a)
+        {
+            build(a, 0, 0, size);
+        }
+
+        void build(vector<ll> &a, int x, int lx, int rx)
         {
             if (rx - lx == 1)
             {
-                x->value = v;
+                if (lx < (int)a.size())
+                    tree[x] = single(a[lx]);
                 return;
             }
             int m = (lx + rx) / 2;
-            if (i <= m)
-                set(i, v, x->left, lx, m);
-            else
-                set(i, v, x->right, m + 1, rx);
-            x->value = op(x->left, x->right);
-        }
-        segtype sum(int l, int r, TreeNode *x, int lx, int rx)
-        {
-            if (l >= rx || lx >= r || x == NULL)
-                return baseCase;
-            if (lx >= l && rx <= r)
-                return x->value;
-            int m = (lx + rx) / 2;
-            segtype s1 = sum(l, r, x->left, lx, m);
-            segtype s2 = sum(l, r, x->right, m, rx);
-            return op(s1, s2);
+            build(a, 2 * x + 1, lx, m);
+            build(a, 2 * x + 2, m, rx);
+            tree[x] = merge(tree[2 * x + 1], tree[2 * x + 2]);
         }
 
-    private:
-        TreeNode *linkTwoSubtrees(TreeNode *left, TreeNode *right)
+        // Point Update
+        void set(int i, ll v)
         {
-            TreeNode *root = new TreeNode();
-            root->left = left;
-            root->right = right;
-            root->value = op(left, right);
-            return root;
+            set(i, v, 0, 0, size);
         }
-        TreeNode *buildTree(vector<segtype> *arr, int l, int r)
+
+        void set(int i, ll v, int x, int lx, int rx)
         {
-            if (r - l == 1)
+            if (rx - lx == 1)
             {
-                TreeNode *leaf = new TreeNode();
-                leaf->value = (*arr)[l];
-                return leaf;
+                tree[x] = single(v);
+                return;
             }
-            int m = (l + r) / 2;
-            TreeNode *left = buildTree(arr, l, m);
-            TreeNode *right = buildTree(arr, m, r);
-            TreeNode *root = linkTwoSubtrees(left, right);
-            return root;
+            int m = (lx + rx) / 2;
+            if (i < m)
+            {
+                set(i, v, 2 * x + 1, lx, m);
+            }
+            else
+            {
+                set(i, v, 2 * x + 2, m, rx);
+            }
+            tree[x] = merge(tree[2 * x + 1], tree[2 * x + 2]);
         }
-        segtype op(TreeNode *left, TreeNode *right)
+
+        // Range Query
+        T get(int l, int r)
         {
-            return op(left->value, right->value);
+            return get(l, r, 0, 0, size);
         }
-        segtype op(segtype a, segtype b)
+
+        T get(int l, int r, int x, int lx, int rx)
+        {
+            if (lx >= r || rx <= l)
+                return NEUTRAL_ELEMENT;
+            if (lx >= l && rx <= r)
+                return tree[x];
+            int m = (lx + rx) / 2;
+            T s1 = get(l, r, 2 * x + 1, lx, m);
+            T s2 = get(l, r, 2 * x + 2, m, rx);
+            return merge(s1, s2);
+        }
+    };
+
+    struct segtype
+    {
+        ll value;
+    };
+} // namespace seg_tree
+
+// LAZY SEGMENT TREE
+namespace lazy_seg
+{
+    template <typename T>
+    struct SegTree
+    {
+        int size;
+        vector<T> tree;
+        vector<T> lazy;
+        T NEUTRAL_ELEMENT = {0};
+        T NO_OPERATION = {0};
+
+        // Operation functions
+        T merge(T a, T b)
+        {
+            return {a.value + b.value};
+        }
+
+        void apply(int x, T v, int len)
+        {
+            tree[x].value += v.value * len;
+            lazy[x].value += v.value;
+        }
+
+        T single(ll v)
+        {
+            return {v};
+        }
+
+        // Constructor
+        SegTree(int n)
+        {
+            size = 1;
+            while (size < n)
+                size *= 2;
+            tree.resize(2 * size, NEUTRAL_ELEMENT);
+            lazy.resize(2 * size, NO_OPERATION);
+        }
+
+        // Build from existing array
+        void build(vector<ll> &a)
+        {
+            build(a, 0, 0, size);
+        }
+
+        void build(vector<ll> &a, int x, int lx, int rx)
+        {
+            if (rx - lx == 1)
+            {
+                if (lx < (int)a.size())
+                    tree[x] = single(a[lx]);
+                return;
+            }
+            int m = (lx + rx) / 2;
+            build(a, 2 * x + 1, lx, m);
+            build(a, 2 * x + 2, m, rx);
+            tree[x] = merge(tree[2 * x + 1], tree[2 * x + 2]);
+        }
+
+        // Range Update
+        void modify(int l, int r, ll v)
+        {
+            modify(l, r, single(v), 0, 0, size);
+        }
+
+        void modify(int l, int r, T v, int x, int lx, int rx)
+        {
+            if (lx >= r || rx <= l)
+                return;
+            if (lx >= l && rx <= r)
+            {
+                apply(x, v, rx - lx);
+                return;
+            }
+            propagate(x, lx, rx);
+            int m = (lx + rx) / 2;
+            modify(l, r, v, 2 * x + 1, lx, m);
+            modify(l, r, v, 2 * x + 2, m, rx);
+            tree[x] = merge(tree[2 * x + 1], tree[2 * x + 2]);
+        }
+
+        void propagate(int x, int lx, int rx)
+        {
+            if (lazy[x].value == NO_OPERATION.value)
+                return;
+
+            int m = (lx + rx) / 2;
+            apply(2 * x + 1, lazy[x], m - lx);
+            apply(2 * x + 2, lazy[x], rx - m);
+
+            lazy[x] = NO_OPERATION;
+        }
+
+        // Range Query
+        T calc(int l, int r)
+        {
+            return calc(l, r, 0, 0, size);
+        }
+        T calc(int l, int r, int x, int lx, int rx)
+        {
+            if (lx >= r || rx <= l)
+                return NEUTRAL_ELEMENT;
+            if (lx >= l && rx <= r)
+                return tree[x];
+            propagate(x, lx, rx);
+            int m = (lx + rx) / 2;
+            T s1 = calc(l, r, 2 * x + 1, lx, m);
+            T s2 = calc(l, r, 2 * x + 2, m, rx);
+            return merge(s1, s2);
+        }
+    };
+
+    struct segtype
+    {
+        ll value;
+    };
+} // namespace lazy_seg
+
+// PERSISTENT SEGMENT TREE
+namespace pers_seg
+{
+    struct segtype
+    {
+        ll value;
+    };
+    struct node
+    {
+        int left, right;
+        segtype item;
+    };
+    struct SegTree
+    {
+        int size;
+        const static int MAX_NODES = 4e6 + 5;
+        vector<node> tree;
+        vector<int> roots;
+        int NEXT_NODE = 0;
+        segtype NEUTRAL_ELEMENT = {0};
+
+        // Operation function (e.g., sum, min, max, gcd)
+        segtype merge(segtype a, segtype b)
+        {
+            return {a.value + b.value};
+        }
+        segtype single(ll v)
+        {
+            return {v};
+        }
+
+        // Node Manipulation
+        int new_node(segtype v)
+        {
+            int id = NEXT_NODE++;
+            tree[id].item = v;
+            tree[id].left = tree[id].right = -1;
+            return id;
+        }
+
+        int copy_node(int x)
+        {
+            int new_id = NEXT_NODE++;
+            tree[new_id] = tree[x];
+            return new_id;
+        }
+
+        // Constructor
+        SegTree(int n)
+        {
+            size = 1;
+            while (size < n)
+                size *= 2;
+            NEXT_NODE = 0;
+            tree.resize(MAX_NODES);
+        }
+
+        // Build from existing array
+        void build(vector<ll> &a)
+        {
+            roots.push_back(build(a, 0, size));
+        }
+
+        int build(vector<ll> &a, int lx, int rx)
+        {
+            int id = new_node(NEUTRAL_ELEMENT);
+            if (rx - lx == 1)
+            {
+                if (lx < (int)a.size())
+                    tree[id].item = single(a[lx]);
+                return id;
+            }
+            int m = (lx + rx) / 2;
+            tree[id].left = build(a, lx, m);
+            tree[id].right = build(a, m, rx);
+            tree[id].item = merge(tree[tree[id].left].item, tree[tree[id].right].item);
+            return id;
+        }
+
+        // Point Update
+        void set(int i, ll v, int x)
+        {
+            roots.push_back(set(i, v, x, 0, size));
+        }
+
+        int set(int i, ll v, int x, int lx, int rx)
+        {
+            int id = copy_node(x);
+            if (rx - lx == 1)
+            {
+                tree[id].item = single(v);
+                return id;
+            }
+            int m = (lx + rx) / 2;
+            if (i < m)
+                tree[id].left = set(i, v, tree[x].left, lx, m);
+            else
+                tree[id].right = set(i, v, tree[x].right, m, rx);
+            tree[id].item = merge(tree[tree[id].left].item, tree[tree[id].right].item);
+            return id;
+        }
+
+        // Range Query
+        segtype calc(int l, int r, int x)
+        {
+            return calc(l, r, x, 0, size);
+        }
+
+        segtype calc(int l, int r, int x, int lx, int rx)
+        {
+            if (lx >= r || rx <= l)
+                return NEUTRAL_ELEMENT;
+            if (lx >= l && rx <= r)
+                return tree[x].item;
+            int m = (lx + rx) / 2;
+            segtype s1 = calc(l, r, tree[x].left, lx, m);
+            segtype s2 = calc(l, r, tree[x].right, m, rx);
+            return merge(s1, s2);
+        }
+    };
+} // namespace pers_seg
+
+// SPARSE TABLE
+namespace spa_table
+{
+    typedef ll spatype;
+    struct SpaTable
+    {
+        vector<vector<spatype>> table;
+        ll N, K;
+
+        spatype merge(spatype a, spatype b)
         {
             return a + b;
         }
+
+        SpaTable(ll n)
+        {
+            K = log2_floor(n);
+            N = n;
+            table = vector<vector<spatype>>(K + 1, vector<spatype>(n));
+        }
+
+        void build(vector<ll> arr)
+        {
+            table[0] = arr;
+            for (int i = 1; i <= K; i++)
+                for (int j = 0; j + (1 << i) <= N; j++)
+                    table[i][j] = merge(table[i - 1][j], table[i - 1][j + (1 << (i - 1))]);
+        }
+
+        ll calc(int l, int r)
+        {
+            ll sum = 0;
+            for (int i = K; i >= 0; i--)
+            {
+                if ((1 << i) <= r - l + 1)
+                {
+                    sum += table[i][l];
+                    l += (1 << i);
+                }
+            }
+            return sum;
+        }
+
+        ll calc_rmq(int l, int r)
+        {
+            int i = log2_floor(r - l + 1);
+            return merge(table[i][l], table[i][r - (1 << i) + 1]);
+        }
+
+        int log2_floor(unsigned long i)
+        {
+            // return std::bit_width(i) - 1;
+            // for pre C++20
+            return i ? __builtin_clzll(1) - __builtin_clzll(i) : -1;
+        }
     };
-} // namespace seg_tree
+} // namespace spa_table
 
 // SOLVE SPACE
 void solve()
