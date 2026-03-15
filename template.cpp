@@ -204,7 +204,7 @@ namespace seg_tree
     {
         int size;
         vector<T> tree;
-        T NEUTRAL_ELEMENT = {0}; // Change based on operation (0 for sum, INF for min)
+        T NEUTRAL_ELEMENT = {0};
 
         // Operation function (e.g., sum, min, max, gcd)
         T merge(T a, T b)
