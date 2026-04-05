@@ -58,20 +58,21 @@ int dx[4] = {0, 1, 0, -1};
 int dy[4] = {-1, 0, 1, 0};
 
 vector<vll> adj;
+vll w, b;
 string str;
 
-ll dfs(int i)
+pll dfs(int i)
 {
-    if (adj[i][0] == -1 && adj[i][1] == -1)
-        return 0ll;
-    ll ret = INF;
+    for (auto e:adj[i])
+    {
+        pll val = dfs(e);
+        w[i] += val.F;
+        b[i] += val.S;
+    }
 
-    if (adj[i][0] != -1)
-        ret = min(ret, dfs(adj[i][0]) + (str[i] != 'L'));
-    if (adj[i][1] != -1)
-        ret = min(ret, dfs(adj[i][1]) + (str[i] != 'R'));
-
-    return ret;
+    w[i] += (str[i] == 'W');
+    b[i] += (str[i] == 'B');
+    return {w[i], b[i]};
 }
 
 // SOLVE SPACE
@@ -81,21 +82,24 @@ void solve()
     // freopen("file.out", "w", stdout);
     ll n;
     cin >> n;
+    
+    adj = vector<vll>(n);
+    w = vll(n);
+    b = vll(n);
+    
+    rep(i, 1, n)
+    {
+        ll a;
+        cin >> a;
+        a--;
+        adj[a].push_back(i);
+    }
     cin >> str;
 
-    adj = vector<vll>(n);
-
-    vll v;
-    rep(i, 0, n)
-    {
-        ll a, b;
-        cin >> a >> b;
-        a--, b--;
-        adj[i].push_back(a);
-        adj[i].push_back(b);
-    }
-
-    cout << dfs(0) << endl;
+    dfs(0);
+    int sum = 0;
+    rep(i, 0, n) sum += (w[i] == b[i]);
+    cout << sum << endl;
 }
 
 int main()

@@ -52,26 +52,35 @@ const ll MOD = 1e9 + 7;
 const ll iMOD = 998244353;
 const int SZ = 1e5 + 1;
 
-// GRID MOVEMENT
-bool is_valid(int i, int j, int n, int m) { return i < n && i >= 0 && j < m && j >= 0; }
-int dx[4] = {0, 1, 0, -1};
-int dy[4] = {-1, 0, 1, 0};
-
-vector<vll> adj;
-string str;
-
-ll dfs(int i)
+vector<bool> sieve(int n)
 {
-    if (adj[i][0] == -1 && adj[i][1] == -1)
-        return 0ll;
-    ll ret = INF;
 
-    if (adj[i][0] != -1)
-        ret = min(ret, dfs(adj[i][0]) + (str[i] != 'L'));
-    if (adj[i][1] != -1)
-        ret = min(ret, dfs(adj[i][1]) + (str[i] != 'R'));
+    vector<bool> primes(n + 1, true);
 
-    return ret;
+    primes[0] = primes[1] = false;
+
+    for (int i = 2; i * i <= n; i++)
+    {
+        if (primes[i])
+        {
+            for (int j = i * i; j <= n; j += i)
+                primes[j] = false;
+        }
+    }
+
+    return primes;
+}
+
+vll get_primes(int n)
+{
+    vll primes;
+    vector<bool> is_prime = sieve(n);
+    for (int i = 1; i <= n; i++)
+    {
+        if (is_prime[i])
+            primes.push_back(i);
+    }
+    return primes;
 }
 
 // SOLVE SPACE
@@ -81,21 +90,13 @@ void solve()
     // freopen("file.out", "w", stdout);
     ll n;
     cin >> n;
-    cin >> str;
-
-    adj = vector<vll>(n);
-
-    vll v;
+    vll p = get_primes(1000000);
+    p.push_back(1);
     rep(i, 0, n)
     {
-        ll a, b;
-        cin >> a >> b;
-        a--, b--;
-        adj[i].push_back(a);
-        adj[i].push_back(b);
+        cout << p[i] * p[i+1] << ' ';
     }
-
-    cout << dfs(0) << endl;
+    cout << endl;
 }
 
 int main()

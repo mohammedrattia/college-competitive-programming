@@ -52,26 +52,38 @@ const ll MOD = 1e9 + 7;
 const ll iMOD = 998244353;
 const int SZ = 1e5 + 1;
 
-// GRID MOVEMENT
-bool is_valid(int i, int j, int n, int m) { return i < n && i >= 0 && j < m && j >= 0; }
-int dx[4] = {0, 1, 0, -1};
-int dy[4] = {-1, 0, 1, 0};
+vll parent;
+vll sizes;
 
-vector<vll> adj;
-string str;
+void make_set(int v) {
+    parent[v] = v;
+    sizes[v] = 1;
+}
 
-ll dfs(int i)
+int find_set(int v)
 {
-    if (adj[i][0] == -1 && adj[i][1] == -1)
-        return 0ll;
-    ll ret = INF;
+    if (v == parent[v])
+        return v;
+    return parent[v] = find_set(parent[v]);
+}
 
-    if (adj[i][0] != -1)
-        ret = min(ret, dfs(adj[i][0]) + (str[i] != 'L'));
-    if (adj[i][1] != -1)
-        ret = min(ret, dfs(adj[i][1]) + (str[i] != 'R'));
+void union_sets(int& a, int& b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b) {
+        if (sizes[a] < sizes[b])
+            swap(a, b);
+        parent[b] = a;
+        sizes[a] += sizes[b];
+    }
+}
 
-    return ret;
+void init_set(ll n)
+{
+    parent = vll(n);
+    sizes = vll(n);
+    rep(i, 0, n)
+        make_set(i);
 }
 
 // SOLVE SPACE
@@ -79,30 +91,30 @@ void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n;
-    cin >> n;
-    cin >> str;
-
-    adj = vector<vll>(n);
-
-    vll v;
-    rep(i, 0, n)
+    ll n, q;
+    cin >> n >> q;
+    init_set(n);
+    ll k = n, mx = 1ll;
+    while (q--)
     {
-        ll a, b;
-        cin >> a >> b;
-        a--, b--;
-        adj[i].push_back(a);
-        adj[i].push_back(b);
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        if (find_set(u) != find_set(v))
+        {
+            union_sets(u, v);
+            mx = max(mx, max(sizes[u], sizes[v]));
+            k--;
+        }
+        cout << k << ' ' << mx << endl;
     }
-
-    cout << dfs(0) << endl;
 }
 
 int main()
 {
     // FAST;
-    int t;
-    cin >> t;
-    while (t--)
-        solve();
+    // int t;
+    // cin >> t;
+    // while (t--)
+    solve();
 }

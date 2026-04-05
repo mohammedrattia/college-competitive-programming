@@ -593,6 +593,113 @@ namespace spa_table
     };
 } // namespace spa_table
 
+// MERGE SORT TREE
+namespace merge_sort_tree
+{
+    struct segtype
+    {
+        vector<ll> vec;
+    };
+
+    template <typename T>
+    struct MergeSortTree
+    {
+        int size;
+        vector<T> tree;
+        T NEUTRAL_ELEMENT = {{}};
+
+        T merge(const T &a, const T &b)
+        {
+            T res;
+            res.vec.reserve(a.vec.size() + b.vec.size());
+            std::merge(a.vec.begin(), a.vec.end(),
+                       b.vec.begin(), b.vec.end(),
+                       std::back_inserter(res.vec));
+            return res;
+        }
+
+        T single(ll v)
+        {
+            return {{v}};
+        }
+
+        MergeSortTree(int n)
+        {
+            size = 1;
+            while (size < n)
+                size *= 2;
+            tree.resize(2 * size, NEUTRAL_ELEMENT);
+        }
+
+        void build(const vector<ll> &a)
+        {
+            build(a, 0, 0, size);
+        }
+
+        void build(const vector<ll> &a, int x, int lx, int rx)
+        {
+            if (rx - lx == 1)
+            {
+                if (lx < (int)a.size())
+                    tree[x] = single(a[lx]);
+                return;
+            }
+            int m = (lx + rx) / 2;
+            build(a, 2 * x + 1, lx, m);
+            build(a, 2 * x + 2, m, rx);
+            tree[x] = merge(tree[2 * x + 1], tree[2 * x + 2]);
+        }
+
+        int get(int l, int r, ll target_x)
+        {
+            return get(l, r, target_x, 0, 0, size);
+        }
+
+        int get(int l, int r, ll target_x, int x, int lx, int rx)
+        {
+            if (lx >= r || rx <= l)
+                return 0;
+            
+            if (lx >= l && rx <= r)
+            {
+                auto it_low = lower_bound(tree[x].vec.begin(), tree[x].vec.end(), target_x);
+                auto it_high = upper_bound(tree[x].vec.begin(), tree[x].vec.end(), target_x);
+                return distance(it_low, it_high);
+            }
+            
+            int m = (lx + rx) / 2;
+            int s1 = get(l, r, target_x, 2 * x + 1, lx, m);
+            int s2 = get(l, r, target_x, 2 * x + 2, m, rx);
+            return s1 + s2;
+        }
+    };
+} // namespace merge_sort_tree
+
+// DSU
+namespace dsu
+{
+    vll parent;
+    void make_set(int v)
+    {
+        parent[v] = v;
+    }
+
+    int find_set(int v)
+    {
+        if (v == parent[v])
+            return v;
+        return parent[v] = find_set(parent[v]);
+    }
+
+    void union_sets(int a, int b)
+    {
+        a = find_set(a);
+        b = find_set(b);
+        if (a != b)
+            parent[b] = a;
+    }
+} // namespace dsu
+
 // SOLVE SPACE
 void solve()
 {

@@ -63,7 +63,7 @@ struct SpaTable
 
     spatype merge(spatype a, spatype b)
     {
-        return gcd(a, b);
+        return max(a, b);
     }
 
     SpaTable(ll n)
@@ -114,46 +114,27 @@ void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n, m;
-    cin >> n;
+    ll n, q;
+    cin >> n >> q;
 
     vll arr(n);
     rep(i, 0, n) cin >> arr[i];
-    arr.push_back(0);
     SpaTable st = SpaTable(n);
     st.build(arr);
 
-    map<ll, ll> mp;
+    ll mn = INF;
 
-    rep(i, 0, n)
+    rep(i, 0, q)
     {
-        ll x = st.calc_rmq(i, i);
-        int last = i;
-        while (x)
+        ll d;
+        cin >> d;
+        d--;
+        rep(j, 0, n - d)
         {
-            int l = last, r = n;
-            while (l < r)
-            {
-                int mid = l + (r - l) / 2;
-                ll k = st.calc_rmq(i, mid);
-                if (k < x)
-                    r = mid;
-                else
-                    l = mid + 1;
-            }
-            mp[x] += l - last;
-            x = st.calc_rmq(i, l);
-            last = l;
-            if (l == n)
-                break;
+            mn = min(mn, st.calc_rmq(j, j + d));
         }
-    }
-    cin >> m;
-    rep(i, 0, m)
-    {
-        ll c;
-        cin >> c;
-        cout << mp[c] << endl;
+        cout << mn << endl;
+        mn = INF;
     }
 }
 

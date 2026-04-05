@@ -52,50 +52,52 @@ const ll MOD = 1e9 + 7;
 const ll iMOD = 998244353;
 const int SZ = 1e5 + 1;
 
-// GRID MOVEMENT
-bool is_valid(int i, int j, int n, int m) { return i < n && i >= 0 && j < m && j >= 0; }
-int dx[4] = {0, 1, 0, -1};
-int dy[4] = {-1, 0, 1, 0};
-
-vector<vll> adj;
-string str;
-
-ll dfs(int i)
-{
-    if (adj[i][0] == -1 && adj[i][1] == -1)
-        return 0ll;
-    ll ret = INF;
-
-    if (adj[i][0] != -1)
-        ret = min(ret, dfs(adj[i][0]) + (str[i] != 'L'));
-    if (adj[i][1] != -1)
-        ret = min(ret, dfs(adj[i][1]) + (str[i] != 'R'));
-
-    return ret;
-}
-
 // SOLVE SPACE
 void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n;
-    cin >> n;
-    cin >> str;
-
-    adj = vector<vll>(n);
-
-    vll v;
-    rep(i, 0, n)
+    ll n, m;
+    cin >> n >> m;
+    if (n > m || (n == 0 && m%2==0))
     {
-        ll a, b;
-        cin >> a >> b;
-        a--, b--;
-        adj[i].push_back(a);
-        adj[i].push_back(b);
+        cout << "NO" << endl;
+        return;
     }
 
-    cout << dfs(0) << endl;
+    int node = n + m;
+    if ((m - n) % 2 != 0)
+    {
+        cout << "YES" << endl;
+        rep(i, 0, 2*n-1)
+        {
+            cout << node - 1 << ' ' << node << endl;
+            node--;
+        }
+        rep(i, 0, m - n)
+        {
+            if (node == 1) break;
+            cout << 1 << ' ' << node-- << endl;
+        }
+        cout << endl;
+    }
+    else
+    {
+        int node = 1;
+        cout << "YES" << endl;
+        rep(i, 0, 2*n-1)
+        {
+            cout << node << ' ' << node+1 << endl;
+            node++;
+        }
+        ll val = node++;
+        rep(i, 0, m - n)
+        {
+            if (node > n+m) break;
+            cout << val << ' ' << node++ << endl;
+        }
+        cout << endl;
+    }
 }
 
 int main()
