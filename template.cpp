@@ -709,6 +709,113 @@ namespace merge_sort_tree
     };
 } // namespace merge_sort_tree
 
+namespace sqrt_dec
+{
+    struct SqrtDec
+    {
+        vector<ll> bucket;
+        vector<ll> vals;
+        int root;
+        int size;
+        const ll NEUTRAL = INF;
+
+        ll merge(ll a, ll b)
+        {
+            return min(a, b);
+        }
+
+        SqrtDec(int n)
+        {
+            size = n;
+            root = sqrt(n);
+            bucket = vector<ll>(n, NEUTRAL);
+        }
+
+        void build(vector<ll> arr)
+        {
+            vals = arr;
+            for (int i = 0; i < size; i++)
+            {
+                bucket[i / root] = merge(bucket[i / root], vals[i]);
+            }
+        }
+
+        ll calc(int l, int r)
+        {
+            ll ans = NEUTRAL;
+            for (int i = l; i < r; i++)
+            {
+                if (i % root == 0 && i + root - 1 < r)
+                {
+                    ans = merge(ans, bucket[i / root]);
+                    i += root - 1;
+                }
+                else
+                    ans = merge(ans, vals[i]);
+            }
+            return ans;
+        }
+    };
+
+} // namespace sqrt_dec
+
+namespace mo_s_algo
+{
+    void remove(int idx); // TODO: remove value at idx from data structure
+    void add(int idx);    // TODO: add value at idx from data structure
+    int get_answer();     // TODO: extract the current answer of the data structure
+
+    int block_size;
+
+    struct Query
+    {
+        int l, r, idx;
+        bool operator<(Query other) const
+        {
+            return make_pair(l / block_size, r) <
+                   make_pair(other.l / block_size, other.r);
+        }
+    };
+
+    vector<int> answers;
+    void mo_s_algorithm(vector<Query> queries)
+    {
+        answers = vector<int>(queries.size());
+        sort(queries.begin(), queries.end());
+
+        // TODO: initialize data structure
+
+        int l = 0;
+        int r = -1;
+        // invariant: data structure will always reflect the range [l, r]
+        for (Query q : queries)
+        {
+            while (l > q.l)
+            {
+                l--;
+                add(l);
+            }
+            while (r < q.r)
+            {
+                r++;
+                add(r);
+            }
+            while (l < q.l)
+            {
+                remove(l);
+                l++;
+            }
+            while (r > q.r)
+            {
+                remove(r);
+                r--;
+            }
+            answers[q.idx] = get_answer();
+        }
+    }
+
+} // namespace mo_s_algo
+
 // DSU
 namespace dsu
 {
@@ -809,6 +916,38 @@ namespace geometry
         ld c = a * p1.x + b * p1.y;
         return {a, b, -c};
     }
+
+    int quadrant(point a)
+    {
+        if (a.x > 0 && a.y > 0)
+            return 1;
+        else if (a.x < 0 && a.y > 0)
+            return 2;
+        else if (a.x < 0 && a.y < 0)
+            return 3;
+        else if (a.x > 0 && a.y < 0)
+            return 4;
+        return 0;
+    }
+
+    ld triangle_area(point a, point b, point c)
+    {
+        return fabs(cross(vect(a, b), vect(a, c))) / 2.0;
+    }
+
+    int orientation(point a, point b, point p)
+    {
+        point q = vect(a, p);
+        point v = vect(a, b);
+        ld c = cross(q, v);
+        if (c < 0)
+            return -1;
+        else if (c > 0)
+            return 1;
+        else
+            return 0;
+    }
+
 } // namespace geometry
 
 // SOLVE SPACE
