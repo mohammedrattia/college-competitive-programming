@@ -72,6 +72,14 @@ const int SZ = 1e5 + 1;
 bool is_valid(int i, int j, int n, int m) { return i < n && i >= 0 && j < m && j >= 0; }
 int dx[4] = {0, 1, 0, -1};
 int dy[4] = {-1, 0, 1, 0};
+enum
+{
+    U,
+    R,
+    D,
+    L
+};
+string dirs = "URDL";
 
 // RANDOMIZATION
 mt19937 rnd(time(nullptr));
@@ -709,6 +717,7 @@ namespace merge_sort_tree
     };
 } // namespace merge_sort_tree
 
+// SQRT DECOMPOSITION
 namespace sqrt_dec
 {
     struct SqrtDec
@@ -759,6 +768,7 @@ namespace sqrt_dec
 
 } // namespace sqrt_dec
 
+// MO'S ALGORITHM
 namespace mo_s_algo
 {
     void remove(int idx); // TODO: remove value at idx from data structure
@@ -816,9 +826,10 @@ namespace mo_s_algo
 
 } // namespace mo_s_algo
 
-// DSU
-namespace dsu
+// GRAPH
+namespace graph
 {
+    // DSU
     vll parent;
     void make_set(int v)
     {
@@ -839,7 +850,71 @@ namespace dsu
         if (a != b)
             parent[b] = a;
     }
-} // namespace dsu
+
+    // EULER TOUR
+    vector<vector<int>> adj;
+    vector<int> start;
+    vector<int> end;
+    int timer = 0;
+
+    void euler_tour(int i, int last)
+    {
+        start[i] = timer++;
+        for (int n : adj[i])
+        {
+            if (n != last)
+                euler_tour(n, i);
+        }
+        end[i] = timer;
+    }
+
+    // BINARY LIFTING
+    const int LOG = 14;
+    vector<vector<int>> adj;
+    vector<vector<int>> up; // up[MAX_N][LOG]
+    vector<int> depth;      // depth[MAX_N]
+
+    void dfs(int a)
+    {
+        for (int b : adj[a])
+        {
+            depth[b] = depth[a] + 1;
+            up[b][0] = a; // a is parent of b
+            for (int j = 1; j < LOG; j++)
+            {
+                up[b][j] = up[up[b][j - 1]][j - 1];
+            }
+            dfs(b);
+        }
+    }
+
+    // LCA
+    int get_lca(int a, int b)
+    {
+        if (depth[a] < depth[b])
+            swap(a, b);
+        int k = depth[a] - depth[b];
+        for (int j = LOG - 1; j >= 0; j--)
+        {
+            if (k & (1 << j))
+            {
+                a = up[a][k];
+            }
+        }
+        if (a == b)
+            return a;
+        for (int j = LOG - 1; j >= 0; j--)
+        {
+            if (up[a][j] != up[b][j])
+            {
+                a = up[a][j];
+                b = up[b][j];
+            }
+        }
+        return up[a][0];
+    }
+
+} // namespace graph
 
 // Geometry
 namespace geometry

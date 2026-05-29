@@ -76,12 +76,21 @@ void solve()
     // freopen("file.out", "w", stdout);
     ll n;
     cin >> n;
-    string str = "HelloWorld";
-    rep(i, 0, 10)
+    string ans;
+    rep(i, 0, n)
     {
-        if (i == n-1) continue;
-        cout << str[i];
+        string str;
+        cin >> str;
+        if (str[0]-'a' < 3) ans += '2';
+        else if (str[0]-'d' < 3) ans += '3';
+        else if (str[0]-'g' < 3) ans += '4';
+        else if (str[0]-'j' < 3) ans += '5';
+        else if (str[0]-'m' < 3) ans += '6';
+        else if (str[0]-'p' < 4) ans += '7';
+        else if (str[0]-'t' < 3) ans += '8';
+        else if (str[0]-'w' < 4) ans += '9';
     }
+    cout << ans << endl;
 }
 
 int main()

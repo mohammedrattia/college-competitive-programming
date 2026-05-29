@@ -1,0 +1,3 @@
+ t;
+    cin >> t;
+    while (

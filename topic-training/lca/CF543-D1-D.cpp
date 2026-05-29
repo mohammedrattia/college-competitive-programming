@@ -69,6 +69,59 @@ const ll MOD = 1e9 + 7;
 const ll iMOD = 998244353;
 const int SZ = 1e5 + 1;
 
+// BINARY LIFTING
+const int LOG = 20;
+vector<vi> adj;
+vector<vi> up; // up[MAX_N][LOG]
+vi depth;      // depth[MAX_N]
+
+void dfs(int a, int p)
+{
+    for (int b : adj[a])
+    {
+        if (b == p)
+            continue;
+        depth[b] = depth[a] + 1;
+        up[b][0] = a; // a is parent of b
+        for (int j = 1; j < LOG; j++)
+        {
+            up[b][j] = up[up[b][j - 1]][j - 1];
+        }
+        dfs(b, a);
+    }
+}
+
+// LCA
+int get_lca(int a, int b)
+{
+    if (depth[a] < depth[b])
+        swap(a, b);
+    int k = depth[a] - depth[b];
+    for (int j = LOG - 1; j >= 0; j--)
+    {
+        if (k & (1 << j))
+            a = up[a][j];
+    }
+    if (a == b)
+        return a;
+    for (int j = LOG - 1; j >= 0; j--)
+    {
+        if (up[a][j] != up[b][j])
+        {
+            a = up[a][j];
+            b = up[b][j];
+        }
+    }
+    return up[a][0];
+}
+
+ll dist(ll a, ll b)
+{
+    ll v = get_lca(a, b);
+    ll d = depth[a] - depth[v] + depth[b] - depth[v] + 1;
+    return d;
+}
+
 // SOLVE SPACE
 void solve()
 {
@@ -76,12 +129,19 @@ void solve()
     // freopen("file.out", "w", stdout);
     ll n;
     cin >> n;
-    string str = "HelloWorld";
-    rep(i, 0, 10)
+    adj = vector<vi>(n);
+    up = vector<vi>(n, vi(LOG));
+    depth = vi(n);
+    rep(i, 1, n)
     {
-        if (i == n-1) continue;
-        cout << str[i];
+        ll a;
+        cin >> a;
+        a--;
+        adj[i].push_back(a);
+        adj[a].push_back(i);
     }
+    dfs(0, 0);
+    
 }
 
 int main()

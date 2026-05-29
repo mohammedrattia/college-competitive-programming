@@ -74,21 +74,51 @@ void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n;
-    cin >> n;
-    string str = "HelloWorld";
-    rep(i, 0, 10)
+    string str;
+    cin >> str;
+    ll n = str.size();
+    map<char, int> freq;
+    rep(i, 0, n)
     {
-        if (i == n-1) continue;
-        cout << str[i];
+        freq[str[i]]++;
     }
+    priority_queue<pair<ll, char>, vector<pair<ll, char>>> pq;
+    for (auto e : freq)
+    {
+        pq.push({e.S, e.F});
+    }
+    if (pq.top().F > n / 2 + n % 2)
+    {
+        cout << "No" << endl;
+        return;
+    }
+    cout << "Yes" << endl;
+    while (!pq.empty())
+    {
+        pair<ll, char> a = pq.top();
+        pq.pop();
+        cout << a.S;
+        a.F--;
+        if (!pq.empty())
+        {
+            pair<ll, char> b = pq.top();
+            pq.pop();
+            b.F--;
+            cout << b.S;
+            if (b.F != 0)
+                pq.push(b);
+        }
+        if (a.F != 0)
+            pq.push(a);
+    }
+    cout << endl;
 }
 
 int main()
 {
     FAST;
-    // ll t;
-    // cin >> t;
-    // while (t--)
-    solve();
+    ll t;
+    cin >> t;
+    while (t--)
+        solve();
 }

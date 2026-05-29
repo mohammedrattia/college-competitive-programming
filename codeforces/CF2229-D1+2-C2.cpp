@@ -67,28 +67,57 @@ using ordered_multiset = ordered_multimap<K, null_type, Comp>;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
 const ll iMOD = 998244353;
-const int SZ = 1e5 + 1;
+const int SZ = 2e5 + 1;
 
 // SOLVE SPACE
 void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n;
+    ll n, q;
     cin >> n;
-    string str = "HelloWorld";
-    rep(i, 0, 10)
+    vll arr(n);
+    ll k = -1, neg = 0, pos = 0;
+    rep(i, 0, n)
     {
-        if (i == n-1) continue;
-        cout << str[i];
+        cin >> arr[i];
+        neg -= arr[i] * (arr[i] < 0);
     }
+    ll idx = -1, mx = 0;
+    rrep(i, n-1, 0)
+    {
+        if (arr[i] > 0 && neg - arr[i] > mx)
+        {
+            mx = neg - arr[i];
+            idx = i;
+        }
+        else if (arr[i] < 0) neg += arr[i];
+    }
+    
+    vll ans;
+    ll cur = 1;
+    rrep(i, idx-1, 0)
+    {
+        if (arr[i] > 0 == cur)
+        {
+            ans.push_back(i);
+            cur = !cur;
+        }
+    }
+    if (idx != -1)
+        ans.push_back(idx);
+
+    cout << ans.size() << endl;
+    for (auto &e : ans)
+        cout << e + 1 << ' ';
+    cout << endl;
 }
 
 int main()
 {
-    FAST;
-    // ll t;
-    // cin >> t;
-    // while (t--)
-    solve();
+    // FAST;
+    ll t;
+    cin >> t;
+    while (t--)
+        solve();
 }

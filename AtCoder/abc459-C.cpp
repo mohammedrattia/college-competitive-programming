@@ -74,13 +74,30 @@ void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n;
-    cin >> n;
-    string str = "HelloWorld";
-    rep(i, 0, 10)
+    ll n, q;
+    cin >> n >> q;
+    vll arr(n, 0);
+    ordered_multiset<int> freq;
+    rep(i, 0, n) freq.insert(0);
+    rep(i, 0, q)
     {
-        if (i == n-1) continue;
-        cout << str[i];
+        ll c, x;
+        cin >> c >> x;
+        c--;
+        if (c)
+        {
+            int a = freq.size();
+            int b = freq.order_of_key(x + *freq.find_by_order(0));
+            cout << a - b << endl;
+        }
+        else
+        {
+            x--;
+            auto it = freq.find_by_order(freq.order_of_key(arr[x]));
+            freq.erase(it);
+            arr[x]++;
+            freq.insert(arr[x]); 
+        }
     }
 }
 

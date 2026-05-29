@@ -67,28 +67,32 @@ using ordered_multiset = ordered_multimap<K, null_type, Comp>;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
 const ll iMOD = 998244353;
-const int SZ = 1e5 + 1;
+const int SZ = 2e5 + 1;
 
 // SOLVE SPACE
 void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n;
+    ll n, q;
     cin >> n;
-    string str = "HelloWorld";
-    rep(i, 0, 10)
+    vll arr(n);
+    ll mx = 0, mn = INF;
+    rep(i, 0, n)
     {
-        if (i == n-1) continue;
-        cout << str[i];
+        cin >> arr[i];
+        if (arr[i] > mx) mx = arr[i];
+        if (arr[i] < mn) mn = arr[i];
     }
+    ll avg = (mx+mn)/2;
+    cout << max(mx - avg, avg - mn) << endl;
 }
 
 int main()
 {
     FAST;
-    // ll t;
-    // cin >> t;
-    // while (t--)
-    solve();
+    ll t;
+    cin >> t;
+    while (t--)
+        solve();
 }
