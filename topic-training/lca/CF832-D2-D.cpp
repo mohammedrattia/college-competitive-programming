@@ -146,7 +146,7 @@ void solve()
         ll a, b, c;
         cin >> a >> b >> c;
         a--, b--, c--;
-        
+
         ll ab = get_lca(a, b);
         ll bc = get_lca(b, c);
         ll ca = get_lca(c, a);
