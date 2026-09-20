@@ -1,25 +1,25 @@
 // #pragma GCC optimize("O3,unroll-loops")
 
-#include <iostream>
-#include <string.h>
-#include <string>
-#include <numeric>
-#include <iomanip>
-#include <array>
-#include <vector>
 #include <algorithm>
-#include <cmath>
-#include <math.h>
+#include <array>
 #include <climits>
-#include <map>
-#include <set>
-#include <unordered_set>
-#include <queue>
-#include <stack>
-#include <unordered_map>
-#include <random>
+#include <cmath>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <math.h>
+#include <numeric>
+#include <queue>
+#include <random>
+#include <set>
+#include <stack>
+#include <string.h>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 using namespace std;
 using namespace __gnu_pbds;
@@ -27,8 +27,7 @@ using namespace __gnu_pbds;
 // Policy-Based Data Structures (PBDs)
 template <typename K, typename V, typename Comp = less<K>>
 using ordered_map = tree<K, V, Comp, rb_tree_tag, tree_order_statistics_node_update>;
-template <typename K, typename Comp = less<K>>
-using ordered_set = ordered_map<K, null_type, Comp>;
+template <typename K, typename Comp = less<K>> using ordered_set = ordered_map<K, null_type, Comp>;
 
 template <typename K, typename V, typename Comp = less_equal<K>>
 using ordered_multimap = tree<K, V, Comp, rb_tree_tag, tree_order_statistics_node_update>;
@@ -57,9 +56,9 @@ using ordered_multiset = ordered_multimap<K, null_type, Comp>;
 #define sz(x) (int)(x).size()
 #define SQ(a) (a) * (a)
 #define dbg(x) cout << #x << " = " << x << '\n'
-#define FAST                          \
-    ios_base::sync_with_stdio(false); \
-    cin.tie(NULL);                    \
+#define FAST                                                                                       \
+    ios_base::sync_with_stdio(false);                                                              \
+    cin.tie(NULL);                                                                                 \
     cout.tie(NULL);
 #define endl '\n'
 
@@ -77,7 +76,7 @@ vi depth;      // depth[MAX_N]
 
 void dfs(int a, int p)
 {
-    for (int b : adj[a])
+    for (auto b : adj[a])
     {
         if (b == p)
             continue;
@@ -122,25 +121,90 @@ ll dist(ll a, ll b)
     return d;
 }
 
+vi in, out;
+int timer = 0;
+
+void euler_tour(int at, int prev)
+{
+    in[at] = timer++;
+    for (int e : adj[at])
+    {
+        if (e != prev)
+        {
+            euler_tour(e, at);
+        }
+    }
+
+    out[at] = timer;
+}
+
 // SOLVE SPACE
 void solve()
 {
     // freopen("file.in", "r", stdin);
     // freopen("file.out", "w", stdout);
-    ll n;
+    ll n, q;
     cin >> n;
     adj = vector<vi>(n);
     up = vector<vi>(n, vi(LOG));
-    depth = vi(n);
+    in = out = depth = vi(n);
+
     rep(i, 1, n)
     {
-        ll a;
-        cin >> a;
-        a--;
-        adj[i].push_back(a);
-        adj[a].push_back(i);
+        ll a, b;
+        cin >> a >> b;
+        a--, b--;
+        adj[a].push_back(b);
+        adj[b].push_back(a);
     }
     dfs(0, 0);
+    euler_tour(0, 0);
+
+    cin >> q;
+    rep(i, 0, q)
+    {
+        ll a, b;
+        cin >> a >> b;
+        a--, b--;
+        if (a == b)
+        {
+            cout << n << endl;
+            continue;
+        }
+        ll x = dist(a, b);
+        if (x % 2 == 0)
+        {
+            cout << 0 << endl;
+            continue;
+        }
+        if (depth[a] < depth[b])
+            swap(a, b);
+        int k = x / 2 - 1, mida = a;
+        for (int j = LOG - 1; j >= 0; j--)
+        {
+            if (k & (1 << j))
+                mida = up[mida][j];
+        }
+        if (get_lca(a, b) == up[mida][0])
+        {
+            int midb = b;
+            for (int j = LOG - 1; j >= 0; j--)
+            {
+                if (k & (1 << j))
+                    midb = up[midb][j];
+            }
+            int psz = out[0] - in[0];
+            int asz = out[mida] - in[mida];
+            int bsz = out[midb] - in[midb];
+            cout << psz - asz - bsz << endl;
+        }
+        else
+        {
+            int psz = out[up[mida][0]] - in[up[mida][0]];
+            int asz = out[mida] - in[mida];
+            cout << psz - asz << endl;
+        }
+    }
 }
 
 int main()
